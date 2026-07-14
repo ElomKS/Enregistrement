@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import IntakeForm from "./components/IntakeForm";
 import RegistryList from "./components/RegistryList";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import AdminPanel from "./components/AdminPanel";
 
 const emptyForm = { firstName: "", lastName: "", phoneNumber: "", profession: "", request: "" };
 
@@ -17,6 +18,7 @@ export default function UserRegistry() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [status, setStatus] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
 
   const authUser = getAuthUser();
   const isAdmin = authUser?.role === "admin";
@@ -118,7 +120,7 @@ export default function UserRegistry() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-surface via-surface-dark to-surface-deep text-ink font-sans">
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <Header userCount={users.length} role={authUser?.role} username={authUser?.username} onLogout={handleLogout} />
+        <Header userCount={users.length} role={authUser?.role} username={authUser?.username} onLogout={handleLogout} onOpenAdmin={() => setAdminOpen(true)} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8">
           <IntakeForm
@@ -148,6 +150,8 @@ export default function UserRegistry() {
       {pendingDelete && (
         <DeleteConfirmModal onConfirm={confirmDelete} onCancel={() => setPendingDelete(null)} />
       )}
+
+      <AdminPanel isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
     </div>
   );
 }

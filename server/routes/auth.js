@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
+const { authenticate, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "registre-secret-change-in-production";
@@ -23,6 +24,54 @@ router.post("/login", async (req, res) => {
     }
     const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "24h" });
     res.json({ token, username: user.username, role: user.role });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+router.get("/users", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT id, username, role, created_at FROM auth_users ORDER BY created_at DESC");
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+router.post("/users", authenticate, requireAdmin, async (req, res) => {
+  const { username, password, role } = req.body;
+  if (!username || !password || !role) {
+    return res.status(400).json({ error: "Nom d'utilisateur, mot de passe et rôle requis." });
+  }
+  if (!["admin", "staff"].includes(role)) {
+    return res.status(400).json({ error: "Rôle invalide." });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: "Le mot de passe doit contenir au moins 6 caractères." });
+  }
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await pool.query(
+      "INSERT INTO auth_users (username, password_hash, role) VALUES ($1, $2, $3) RETURNING id, username, role, created_at",
+      [username, hash, role]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Ce nom d'utilisateur existe déjà." });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+router.delete("/users/:id", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { rowCount } = await pool.query("DELETE FROM auth_users WHERE id = $1", [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: "Utilisateur non trouvé." });
+    res.sendStatus(204);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erreur serveur." });

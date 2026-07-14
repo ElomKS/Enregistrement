@@ -44,6 +44,33 @@ async function apiCall(path, options = {}) {
   return res.status === 204 ? null : res.json();
 }
 
+async function authApiCall(path, options = {}) {
+  const headers = { "Content-Type": "application/json" };
+  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+  const res = await fetch(`${AUTH_URL}${path}`, { headers, ...options });
+  if (res.status === 401) { clearAuth(); window.location.reload(); throw new Error("Session expirée."); }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Request failed: ${res.status}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+export async function fetchAuthUsers() {
+  return authApiCall("/users");
+}
+
+export async function createAuthUser(username, password, role) {
+  return authApiCall("/users", {
+    method: "POST",
+    body: JSON.stringify({ username, password, role }),
+  });
+}
+
+export async function deleteAuthUser(id) {
+  return authApiCall(`/users/${id}`, { method: "DELETE" });
+}
+
 export function nextRecordNo(users) {
   const max = users.reduce((m, u) => Math.max(m, parseInt(u.recordNo, 10) || 0), 0);
   return String(max + 1).padStart(4, "0");

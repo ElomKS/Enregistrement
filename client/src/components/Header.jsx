@@ -1,7 +1,7 @@
-import { LogOut } from "lucide-react";
+import { LogOut, Users } from "lucide-react";
 import { todayStamp } from "../api/userService";
 
-export default function Header({ userCount, role, username, onLogout }) {
+export default function Header({ userCount, role, username, onLogout, onOpenAdmin }) {
   return (
     <header className="mb-8">
       <div className="h-1 w-24 bg-accent rounded-full mb-6" />
@@ -17,6 +17,11 @@ export default function Header({ userCount, role, username, onLogout }) {
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-accent/20 text-accent font-medium">{role}</span>
             <span className="text-ink-light">{username}</span>
+            {role === "admin" && (
+              <button onClick={onOpenAdmin} className="text-ink-muted hover:text-accent transition-colors" aria-label="Gérer les comptes">
+                <Users size={13} />
+              </button>
+            )}
             <button onClick={onLogout} className="text-ink-muted hover:text-danger transition-colors" aria-label="Déconnexion">
               <LogOut size={13} />
             </button>
