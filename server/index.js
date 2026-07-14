@@ -32,19 +32,16 @@ const SEED_USERS = [
 
 async function initDB() {
   await pool.query(CREATE_TABLE);
-  const { rowCount } = await pool.query("SELECT COUNT(*) FROM users");
-  if (parseInt(rowCount) === 0 || rowCount === undefined) {
-    const count = await pool.query("SELECT COUNT(*) FROM users");
-    if (parseInt(count.rows[0].count) === 0) {
-      for (const u of SEED_USERS) {
-        await pool.query(
-          `INSERT INTO users (record_no, first_name, last_name, phone_number, profession, request, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [u.record_no, u.first_name, u.last_name, u.phone_number, u.profession, u.request, u.created_at]
-        );
-      }
-      console.log("Seeded initial users.");
+  const { rows } = await pool.query("SELECT COUNT(*)::int AS count FROM users");
+  if (rows[0].count === 0) {
+    for (const u of SEED_USERS) {
+      await pool.query(
+        `INSERT INTO users (record_no, first_name, last_name, phone_number, profession, request, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [u.record_no, u.first_name, u.last_name, u.phone_number, u.profession, u.request, u.created_at]
+      );
     }
+    console.log("Seeded initial users.");
   }
   console.log("Database ready.");
 }
