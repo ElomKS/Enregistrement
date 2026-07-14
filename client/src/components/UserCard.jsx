@@ -44,13 +44,15 @@ export default function UserCard({ user, onSelect, onEdit, onDelete }) {
         >
           <Pencil size={16} />
         </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(user.id); }}
-          className="text-ink-muted hover:text-danger transition-colors"
-          aria-label={`Supprimer ${fullName}`}
-        >
-          <Trash2 size={16} />
-        </button>
+        {onDelete && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(user.id); }}
+            className="text-ink-muted hover:text-danger transition-colors"
+            aria-label={`Supprimer ${fullName}`}
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
     </li>
   );

@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const pool = require("./db");
 const usersRouter = require("./routes/users");
+const authRouter = require("./routes/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,16 @@ const CREATE_TABLE = `
   );
 `;
 
+const CREATE_AUTH_TABLE = `
+  CREATE TABLE IF NOT EXISTS auth_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(10) NOT NULL CHECK (role IN ('admin', 'staff')),
+    created_at DATE DEFAULT CURRENT_DATE
+  );
+`;
+
 const SEED_USERS = [
   { record_no: "0001", first_name: "Jorge", last_name: "Martinez", phone_number: "+33 6 12 34 56 78", profession: "Ingénieur structure", request: "Nécessite l'accès aux fichiers de projet archivés.", created_at: "2026-06-02" },
   { record_no: "0002", first_name: "Anya", last_name: "Kapoor", phone_number: "+33 6 98 76 54 32", profession: "Designer produit", request: "", created_at: "2026-06-14" },
@@ -40,6 +51,8 @@ const SEED_USERS = [
 
 async function initDB() {
   await pool.query(CREATE_TABLE);
+  await pool.query(CREATE_AUTH_TABLE);
+
   const { rows } = await pool.query("SELECT COUNT(*)::int AS count FROM users");
   if (rows[0].count === 0) {
     for (const u of SEED_USERS) {
@@ -51,9 +64,22 @@ async function initDB() {
     }
     console.log("Seeded initial users.");
   }
+
+  const bcrypt = require("bcryptjs");
+  const authCount = await pool.query("SELECT COUNT(*)::int AS count FROM auth_users");
+  if (authCount.rows[0].count === 0) {
+    const hash = await bcrypt.hash("admin123", 10);
+    await pool.query(
+      "INSERT INTO auth_users (username, password_hash, role) VALUES ($1, $2, $3)",
+      ["admin", hash, "admin"]
+    );
+    console.log("Seeded default admin account (admin / admin123).");
+  }
+
   console.log("Database ready.");
 }
 
+app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 
 initDB()

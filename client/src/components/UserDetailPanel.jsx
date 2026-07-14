@@ -1,6 +1,6 @@
 import { X, Phone, Briefcase, MessageSquare, Calendar, Hash } from "lucide-react";
 
-export default function UserDetailPanel({ user, onClose, onEdit, onDelete }) {
+export default function UserDetailPanel({ user, onClose, onEdit, onDelete, isAdmin }) {
   if (!user) return null;
 
   const fullName = `${user.firstName} ${user.lastName}`;
@@ -61,12 +61,14 @@ export default function UserDetailPanel({ user, onClose, onEdit, onDelete }) {
         >
           Modifier
         </button>
-        <button
-          onClick={() => { onClose(); onDelete(user.id); }}
-          className="text-sm px-4 py-2 rounded-md bg-danger text-danger-text font-medium hover:bg-danger-hover transition-colors"
-        >
-          Supprimer
-        </button>
+        {onDelete && (
+          <button
+            onClick={() => { onClose(); onDelete(user.id); }}
+            className="text-sm px-4 py-2 rounded-md bg-danger text-danger-text font-medium hover:bg-danger-hover transition-colors"
+          >
+            Supprimer
+          </button>
+        )}
       </div>
     </div>
   );

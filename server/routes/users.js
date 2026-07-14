@@ -1,7 +1,10 @@
 const express = require("express");
 const pool = require("../db");
+const { authenticate, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
+
+router.use(authenticate);
 
 function formatUser(row) {
   return {
@@ -77,7 +80,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const { rowCount } = await pool.query("DELETE FROM users WHERE id = $1", [req.params.id]);
     if (rowCount === 0) return res.status(404).json({ error: "User not found" });
