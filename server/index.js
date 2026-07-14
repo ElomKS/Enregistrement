@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const ALLOWED_ORIGINS = [
   process.env.FRONTEND_URL,
-  "https://registre-ybi9.onrender.com",
+  "https://registrekfe.onrender.com",
 ].filter(Boolean);
 
 app.use(cors({
