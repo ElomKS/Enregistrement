@@ -147,7 +147,7 @@ export default function AdminPanel({ isOpen, onClose }) {
               <li key={u.id} className="flex items-center justify-between bg-panel-input border border-border rounded-md px-3 py-2">
                 <div>
                   <span className="text-ink-light text-sm">{u.username}</span>
-                  <span className={`ml-2 text-xs px-2 py-0.5 rounded font-medium ${u.role === "admin" ? "bg-accent/20 text-accent" : "bg-success/20 text-success"}`}>
+                  <span className={`ml-2 text-xs px-2 py-0.5 rounded font-medium ${u.role === "admin" ? "bg-accent/20 text-accent" : "bg-success/30 text-[#8FBFA0]"}`}>
                     {u.role}
                   </span>
                 </div>
