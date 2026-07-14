@@ -6,9 +6,17 @@ const usersRouter = require("./routes/users");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://enregistrement-static.onrender.com";
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL,
+  "https://enregistrement-static.onrender.com",
+].filter(Boolean);
 
-app.use(cors({ origin: FRONTEND_URL }));
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
+}));
 app.use(express.json());
 
 const CREATE_TABLE = `
