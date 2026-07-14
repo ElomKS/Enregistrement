@@ -100,4 +100,23 @@ router.put("/password", authenticate, async (req, res) => {
   }
 });
 
+router.put("/users/:id/password", authenticate, requireAdmin, async (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword) {
+    return res.status(400).json({ error: "Nouveau mot de passe requis." });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: "Le mot de passe doit contenir au moins 6 caractères." });
+  }
+  try {
+    const hash = await bcrypt.hash(newPassword, 10);
+    const { rowCount } = await pool.query("UPDATE auth_users SET password_hash = $1 WHERE id = $2", [hash, req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: "Utilisateur non trouvé." });
+    res.json({ message: "Mot de passe modifié." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
 module.exports = router;

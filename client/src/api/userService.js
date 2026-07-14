@@ -78,6 +78,13 @@ export async function changePassword(currentPassword, newPassword) {
   });
 }
 
+export async function resetUserPassword(userId, newPassword) {
+  return authApiCall(`/users/${userId}/password`, {
+    method: "PUT",
+    body: JSON.stringify({ newPassword }),
+  });
+}
+
 export function nextRecordNo(users) {
   const max = users.reduce((m, u) => Math.max(m, parseInt(u.recordNo, 10) || 0), 0);
   return String(max + 1).padStart(4, "0");
