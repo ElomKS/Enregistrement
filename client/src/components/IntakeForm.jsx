@@ -43,7 +43,7 @@ export default function IntakeForm({
               type="text"
               value={form.firstName}
               onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              placeholder="Jorge"
+              placeholder="Prénom"
               className={inputClass(errors.firstName)}
             />
           }
@@ -57,7 +57,7 @@ export default function IntakeForm({
               type="text"
               value={form.lastName}
               onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              placeholder="Martinez"
+              placeholder="Nom"
               className={inputClass(errors.lastName)}
             />
           }
@@ -71,7 +71,7 @@ export default function IntakeForm({
               type="tel"
               value={form.phoneNumber}
               onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
-              placeholder="+33 6 12 34 56 78"
+              placeholder="Numéro de téléphone"
               className={inputClass(errors.phoneNumber)}
             />
           }
@@ -85,7 +85,7 @@ export default function IntakeForm({
               type="text"
               value={form.profession}
               onChange={(e) => setForm({ ...form, profession: e.target.value })}
-              placeholder="Ingénieur structure"
+              placeholder="Profession"
               className={inputClass(errors.profession)}
             />
           }
@@ -97,7 +97,7 @@ export default function IntakeForm({
             <textarea
               value={form.request}
               onChange={(e) => setForm({ ...form, request: e.target.value })}
-              placeholder="Une demande spécifique pour cet utilisateur..."
+              placeholder="Demande (facultatif)"
               rows={3}
               className="w-full bg-panel-input text-ink-light border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-accent transition-colors resize-none"
             />
