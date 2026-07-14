@@ -46,6 +46,10 @@ async function initDB() {
   console.log("Database ready.");
 }
 
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", hasDbUrl: !!process.env.DATABASE_URL, hasFrontendUrl: !!process.env.FRONTEND_URL, nodeEnv: process.env.NODE_ENV });
+});
+
 app.use("/api/users", usersRouter);
 
 initDB()
