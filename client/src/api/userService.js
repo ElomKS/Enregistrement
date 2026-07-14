@@ -71,6 +71,13 @@ export async function deleteAuthUser(id) {
   return authApiCall(`/users/${id}`, { method: "DELETE" });
 }
 
+export async function changePassword(currentPassword, newPassword) {
+  return authApiCall("/password", {
+    method: "PUT",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export function nextRecordNo(users) {
   const max = users.reduce((m, u) => Math.max(m, parseInt(u.recordNo, 10) || 0), 0);
   return String(max + 1).padStart(4, "0");

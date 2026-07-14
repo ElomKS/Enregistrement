@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2 } from "lucide-react";
-import { fetchAuthUsers, createAuthUser, deleteAuthUser } from "../api/userService";
+import { Users, Plus, Trash2, Key } from "lucide-react";
+import { fetchAuthUsers, createAuthUser, deleteAuthUser, changePassword } from "../api/userService";
 
 export default function AdminPanel({ isOpen, onClose }) {
   const [users, setUsers] = useState([]);
@@ -8,7 +8,14 @@ export default function AdminPanel({ isOpen, onClose }) {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("staff");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSuccess, setPwdSuccess] = useState("");
+  const [pwdLoading, setPwdLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) fetchAuthUsers().then(setUsers).catch(() => {});
@@ -19,6 +26,7 @@ export default function AdminPanel({ isOpen, onClose }) {
   async function handleCreate(ev) {
     ev.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
     try {
       const created = await createAuthUser(username, password, role);
@@ -26,6 +34,7 @@ export default function AdminPanel({ isOpen, onClose }) {
       setUsername("");
       setPassword("");
       setRole("staff");
+      setSuccess("Compte créé.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -34,11 +43,30 @@ export default function AdminPanel({ isOpen, onClose }) {
   }
 
   async function handleDelete(id) {
+    setError("");
+    setSuccess("");
     try {
       await deleteAuthUser(id);
       setUsers((prev) => prev.filter((u) => u.id !== id));
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  async function handleChangePassword(ev) {
+    ev.preventDefault();
+    setPwdError("");
+    setPwdSuccess("");
+    setPwdLoading(true);
+    try {
+      await changePassword(currentPwd, newPwd);
+      setPwdSuccess("Mot de passe modifié.");
+      setCurrentPwd("");
+      setNewPwd("");
+    } catch (err) {
+      setPwdError(err.message);
+    } finally {
+      setPwdLoading(false);
     }
   }
 
@@ -78,6 +106,7 @@ export default function AdminPanel({ isOpen, onClose }) {
             <option value="admin">Admin (accès complet)</option>
           </select>
           {error && <p className="text-danger text-sm animate-fade-in">{error}</p>}
+          {success && <p className="text-success text-sm animate-fade-in">{success}</p>}
           <button
             type="submit"
             disabled={loading || !username || !password}
@@ -87,7 +116,7 @@ export default function AdminPanel({ isOpen, onClose }) {
           </button>
         </form>
 
-        <div>
+        <div className="mb-5">
           <p className="text-xs font-mono text-ink-muted uppercase tracking-wider mb-3">Comptes existants</p>
           <ul className="space-y-2">
             {users.map((u) => (
@@ -109,6 +138,36 @@ export default function AdminPanel({ isOpen, onClose }) {
             ))}
           </ul>
         </div>
+
+        <form onSubmit={handleChangePassword} className="space-y-3 border border-border rounded-md p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Key size={14} className="text-accent" />
+            <p className="text-xs font-mono text-ink-muted uppercase tracking-wider">Changer mon mot de passe</p>
+          </div>
+          <input
+            type="password"
+            placeholder="Mot de passe actuel"
+            value={currentPwd}
+            onChange={(e) => setCurrentPwd(e.target.value)}
+            className="w-full bg-panel-input border border-border rounded-md px-3 py-2 text-ink-light text-sm outline-none focus:border-accent transition-colors"
+          />
+          <input
+            type="password"
+            placeholder="Nouveau mot de passe (min. 6 caractères)"
+            value={newPwd}
+            onChange={(e) => setNewPwd(e.target.value)}
+            className="w-full bg-panel-input border border-border rounded-md px-3 py-2 text-ink-light text-sm outline-none focus:border-accent transition-colors"
+          />
+          {pwdError && <p className="text-danger text-sm animate-fade-in">{pwdError}</p>}
+          {pwdSuccess && <p className="text-success text-sm animate-fade-in">{pwdSuccess}</p>}
+          <button
+            type="submit"
+            disabled={pwdLoading || !currentPwd || !newPwd}
+            className="w-full text-sm px-4 py-2 rounded-md border border-border text-ink-muted hover:text-ink-light transition-colors disabled:opacity-50"
+          >
+            {pwdLoading ? "Modification..." : "Modifier le mot de passe"}
+          </button>
+        </form>
       </div>
     </div>
   );
