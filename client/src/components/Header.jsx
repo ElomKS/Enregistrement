@@ -15,7 +15,7 @@ export default function Header({ userCount, role, username, onLogout, onOpenAdmi
           <p>{userCount} enregistrés</p>
           <p>{todayStamp()}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-accent/20 text-ink font-medium">{role}</span>
+            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-medium" style={{ backgroundColor: "rgba(199,154,86,0.2)", color: "#111827" }}>{role}</span>
             <span className="text-ink-light">{username}</span>
             {role === "admin" && (
               <button onClick={onOpenAdmin} className="text-ink-muted hover:text-accent transition-colors" aria-label="Gérer les comptes">
