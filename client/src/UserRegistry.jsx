@@ -1,14 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
-import { seedUsers, apiCall, nextRecordNo, todayStamp, USE_MOCK } from "./api/userService";
+import { apiCall, getAuthUser, clearAuth } from "./api/userService";
 import Header from "./components/Header";
 import IntakeForm from "./components/IntakeForm";
 import RegistryList from "./components/RegistryList";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import AdminPanel from "./components/AdminPanel";
 
 const emptyForm = { firstName: "", lastName: "", phoneNumber: "", profession: "", request: "" };
 
 export default function UserRegistry() {
-  const [users, setUsers] = useState(seedUsers);
+  const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [editingId, setEditingId] = useState(null);
@@ -17,9 +18,12 @@ export default function UserRegistry() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [status, setStatus] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+
+  const authUser = getAuthUser();
+  const isAdmin = authUser?.role === "admin";
 
   useEffect(() => {
-    if (USE_MOCK) return;
     apiCall("").then(setUsers).catch(() => {});
   }, []);
 
@@ -65,26 +69,12 @@ export default function UserRegistry() {
     setStatus(null);
     try {
       if (editingId) {
-        if (USE_MOCK) {
-          setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, ...form } : u)));
-        } else {
-          const updated = await apiCall(`/${editingId}`, { method: "PUT", body: JSON.stringify(form) });
-          setUsers((prev) => prev.map((u) => (u.id === editingId ? updated : u)));
-        }
+        const updated = await apiCall(`/${editingId}`, { method: "PUT", body: JSON.stringify(form) });
+        setUsers((prev) => prev.map((u) => (u.id === editingId ? updated : u)));
         setStatus({ type: "success", text: "Enregistrement mis à jour." });
       } else {
-        if (USE_MOCK) {
-          const newUser = {
-            id: crypto.randomUUID(),
-            recordNo: nextRecordNo(users),
-            createdAt: todayStamp(),
-            ...form,
-          };
-          setUsers((prev) => [newUser, ...prev]);
-        } else {
-          const created = await apiCall("", { method: "POST", body: JSON.stringify(form) });
-          setUsers((prev) => [created, ...prev]);
-        }
+        const created = await apiCall("", { method: "POST", body: JSON.stringify(form) });
+        setUsers((prev) => [created, ...prev]);
         setStatus({ type: "success", text: "Utilisateur inscrit." });
       }
       resetForm();
@@ -113,7 +103,7 @@ export default function UserRegistry() {
     setPendingDelete(null);
     setSelectedUser(null);
     try {
-      if (!USE_MOCK) await apiCall(`/${id}`, { method: "DELETE" });
+      await apiCall(`/${id}`, { method: "DELETE" });
       setUsers((prev) => prev.filter((u) => u.id !== id));
       if (editingId === id) resetForm();
       setStatus({ type: "success", text: "Enregistrement supprimé." });
@@ -122,10 +112,15 @@ export default function UserRegistry() {
     }
   }
 
+  function handleLogout() {
+    clearAuth();
+    window.location.reload();
+  }
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-surface via-surface-dark to-surface-deep text-ink font-sans">
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <Header userCount={users.length} />
+        <Header userCount={users.length} role={authUser?.role} username={authUser?.username} onLogout={handleLogout} onOpenAdmin={() => setAdminOpen(true)} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8">
           <IntakeForm
@@ -146,7 +141,8 @@ export default function UserRegistry() {
             onSelect={setSelectedUser}
             onCloseDetail={() => setSelectedUser(null)}
             onEdit={startEdit}
-            onDelete={setPendingDelete}
+            onDelete={isAdmin ? setPendingDelete : null}
+            isAdmin={isAdmin}
           />
         </div>
       </div>
@@ -154,6 +150,8 @@ export default function UserRegistry() {
       {pendingDelete && (
         <DeleteConfirmModal onConfirm={confirmDelete} onCancel={() => setPendingDelete(null)} />
       )}
+
+      <AdminPanel isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
     </div>
   );
 }

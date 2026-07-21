@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import UserCard from "./UserCard";
 import UserDetailPanel from "./UserDetailPanel";
 
-export default function RegistryList({ filtered, query, setQuery, selectedUser, onSelect, onCloseDetail, onEdit, onDelete }) {
+export default function RegistryList({ filtered, query, setQuery, selectedUser, onSelect, onCloseDetail, onEdit, onDelete, isAdmin }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4 bg-panel card-shadow border border-border rounded-md px-3 py-2">
@@ -38,6 +38,7 @@ export default function RegistryList({ filtered, query, setQuery, selectedUser, 
             onClose={onCloseDetail}
             onEdit={onEdit}
             onDelete={onDelete}
+            isAdmin={isAdmin}
           />
         </>
       )}

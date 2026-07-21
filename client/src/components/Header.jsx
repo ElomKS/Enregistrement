@@ -1,6 +1,7 @@
+import { LogOut, Users } from "lucide-react";
 import { todayStamp } from "../api/userService";
 
-export default function Header({ userCount }) {
+export default function Header({ userCount, role, username, onLogout, onOpenAdmin }) {
   return (
     <header className="mb-8">
       <div className="h-1 w-24 bg-accent rounded-full mb-6" />
@@ -10,9 +11,21 @@ export default function Header({ userCount }) {
           <h1 className="font-display text-4xl font-medium">Registre des utilisateurs</h1>
           <p className="text-ink-muted mt-2 text-sm">Inscrivez de nouveaux utilisateurs et gérez les enregistrements existants.</p>
         </div>
-        <div className="font-mono text-right text-xs text-ink-muted hidden sm:block">
+        <div className="font-mono text-right text-xs text-ink-muted hidden sm:flex sm:flex-col sm:items-end sm:gap-1">
           <p>{userCount} enregistrés</p>
           <p>{todayStamp()}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-medium" style={{ backgroundColor: "rgba(199,154,86,0.2)", color: "#111827" }}>{role}</span>
+            <span className="text-ink">{username}</span>
+            {role === "admin" && (
+              <button onClick={onOpenAdmin} className="text-ink-muted hover:text-accent transition-colors" aria-label="Gérer les comptes">
+                <Users size={13} />
+              </button>
+            )}
+            <button onClick={onLogout} className="text-ink-muted hover:text-danger transition-colors" aria-label="Déconnexion">
+              <LogOut size={13} />
+            </button>
+          </div>
         </div>
       </div>
     </header>
